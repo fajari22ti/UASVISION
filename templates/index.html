@@ -5,841 +5,485 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistem Monitoring Slot Parkir – Politeknik Caltex Riau</title>
   <style>
-    /* ── Reset & Base ──────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --green:  #22c55e;
-      --red:    #ef4444;
-      --blue:   #3b82f6;
-      --dark:   #0f172a;
-      --card:   #1e293b;
-      --border: #334155;
-      --text:   #e2e8f0;
-      --muted:  #94a3b8;
-      --accent: #38bdf8;
+      --green:#22c55e; --red:#ef4444; --blue:#3b82f6;
+      --dark:#0f172a; --card:#1e293b; --border:#334155;
+      --text:#e2e8f0; --muted:#94a3b8; --accent:#38bdf8;
     }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--dark);
-      color: var(--text);
-      min-height: 100vh;
-    }
+    body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--dark); color:var(--text); min-height:100vh; }
 
-    /* ── Header ────────────────────────────────────────────────────── */
     header {
-      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
+      background:linear-gradient(135deg,#0f172a,#1e3a5f);
+      border-bottom:1px solid var(--border);
+      padding:14px 20px; display:flex; align-items:center; gap:12px;
     }
-    .logo-icon {
-      width: 44px; height: 44px;
-      background: var(--accent);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-    }
-    header h1 { font-size: 1.15rem; font-weight: 700; line-height: 1.2; }
-    header p  { font-size: 0.78rem; color: var(--muted); }
-    .header-badge {
-      margin-left: auto;
-      background: #052e16;
-      border: 1px solid var(--green);
-      color: var(--green);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
+    .logo { width:40px;height:40px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px; }
+    header h1 { font-size:1.05rem;font-weight:700; }
+    header p  { font-size:0.75rem;color:var(--muted); }
+    .badge { margin-left:auto;background:#052e16;border:1px solid var(--green);color:var(--green);padding:4px 12px;border-radius:20px;font-size:0.73rem;font-weight:600; }
 
-    /* ── Stats Bar ─────────────────────────────────────────────────── */
-    .stats-bar {
-      display: flex;
-      gap: 12px;
-      padding: 14px 24px;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .stat-card {
-      flex: 1; min-width: 110px;
-      background: var(--dark);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 16px;
-      text-align: center;
-    }
-    .stat-card .val  { font-size: 2rem; font-weight: 800; line-height: 1; }
-    .stat-card .lbl  { font-size: 0.72rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
-    .stat-card.avail .val { color: var(--green); }
-    .stat-card.full  .val { color: var(--red); }
-    .stat-card.total .val { color: var(--accent); }
-    .stat-card.pct   .val { color: #f59e0b; }
+    .stats { display:flex;gap:10px;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap; }
+    .stat  { flex:1;min-width:100px;background:var(--dark);border:1px solid var(--border);border-radius:9px;padding:10px 14px;text-align:center; }
+    .stat .v { font-size:1.9rem;font-weight:800;line-height:1; }
+    .stat .l { font-size:0.68rem;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em; }
+    .stat.av .v{color:var(--green)} .stat.fu .v{color:var(--red)} .stat.to .v{color:var(--accent)} .stat.pc .v{color:#f59e0b}
 
-    /* ── Main Layout ───────────────────────────────────────────────── */
-    .container {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 0;
-      height: calc(100vh - 130px);
-    }
+    .layout { display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 120px); }
 
-    /* ── Sidebar ───────────────────────────────────────────────────── */
-    .sidebar {
-      background: var(--card);
-      border-right: 1px solid var(--border);
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+    .sidebar { background:var(--card);border-right:1px solid var(--border);padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:14px; }
+    .tabs { display:flex;border:1px solid var(--border);border-radius:9px;overflow:hidden; }
+    .tab  { flex:1;padding:9px;text-align:center;cursor:pointer;font-size:0.8rem;font-weight:600;background:transparent;border:none;color:var(--muted);transition:all .2s; }
+    .tab.active { background:var(--blue);color:#fff; }
 
-    /* ── Mode Tabs ─────────────────────────────────────────────────── */
-    .mode-tabs {
-      display: flex;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .mode-tab {
-      flex: 1;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: 600;
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      transition: all .2s;
-    }
-    .mode-tab.active {
-      background: var(--blue);
-      color: #fff;
-    }
+    .sec { display:flex;flex-direction:column;gap:8px; }
+    .sec-title { font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding-bottom:5px;border-bottom:1px solid var(--border); }
 
-    /* ── Section ───────────────────────────────────────────────────── */
-    .section { display: flex; flex-direction: column; gap: 10px; }
-    .section-title {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--border);
-    }
+    .upload-area { border:2px dashed var(--border);border-radius:11px;padding:20px 14px;text-align:center;cursor:pointer;transition:all .2s; }
+    .upload-area:hover,.upload-area.drag { border-color:var(--accent);background:rgba(56,189,248,.06); }
+    .upload-area .ic { font-size:1.8rem;margin-bottom:6px; }
+    .upload-area p  { font-size:0.8rem;color:var(--muted); }
+    .upload-area span { font-size:0.72rem;color:var(--accent); }
+    #thumb { width:100%;border-radius:7px;display:none;margin-top:7px;border:1px solid var(--border); }
+    #fileInput { display:none; }
 
-    /* ── Upload Area ───────────────────────────────────────────────── */
-    .upload-area {
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-      padding: 24px 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: all .2s;
-      background: transparent;
+    /* ── Grid ROI ── */
+    .grid-box { background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:8px; }
+    .grid-row { display:flex;gap:8px;align-items:center; }
+    .grid-row label { font-size:0.75rem;color:var(--muted);width:90px;flex-shrink:0; }
+    .grid-row input[type=number] {
+      flex:1;background:var(--dark);border:1px solid var(--border);border-radius:6px;
+      padding:5px 8px;color:var(--text);font-size:0.82rem;
     }
-    .upload-area:hover, .upload-area.dragover {
-      border-color: var(--accent);
-      background: rgba(56,189,248,.06);
-    }
-    .upload-area .icon { font-size: 2rem; margin-bottom: 8px; }
-    .upload-area p    { font-size: 0.82rem; color: var(--muted); }
-    .upload-area span { font-size: 0.75rem; color: var(--accent); }
-    #fileInput { display: none; }
-    #previewThumb {
-      width: 100%; border-radius: 8px;
-      display: none; margin-top: 8px; border: 1px solid var(--border);
-    }
+    .grid-row input[type=range] { flex:1;accent-color:var(--accent); }
+    .grid-val { font-size:0.78rem;color:var(--accent);font-weight:700;width:28px;text-align:right; }
 
-    /* ── Camera Controls ───────────────────────────────────────────── */
-    #cameraSection { display: none; }
-    .cam-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border:none;border-radius:8px;font-size:0.81rem;font-weight:600;cursor:pointer;transition:all .18s;width:100%; }
+    .btn-primary { background:var(--blue);color:#fff; }
+    .btn-primary:hover { background:#2563eb; }
+    .btn-success { background:var(--green);color:#fff; }
+    .btn-danger  { background:var(--red);color:#fff; }
+    .btn-outline { background:transparent;border:1px solid var(--border);color:var(--text); }
+    .btn-outline:hover { border-color:var(--accent);color:var(--accent); }
+    .btn:disabled { opacity:.4;cursor:not-allowed; }
+    .btn-sm { padding:6px 10px;font-size:0.75rem;width:auto; }
 
-    /* ── ROI Editor ────────────────────────────────────────────────── */
-    .roi-info {
-      font-size: 0.77rem; color: var(--muted);
-      background: rgba(56,189,248,.06);
-      border: 1px solid rgba(56,189,248,.2);
-      border-radius: 8px;
-      padding: 10px;
-      line-height: 1.6;
-    }
-    #roiList { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
-    .roi-item {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--dark);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 0.78rem;
-    }
-    .roi-item .roi-num {
-      width: 22px; height: 22px;
-      background: var(--blue);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
-    }
-    .roi-item .roi-coords { flex: 1; color: var(--muted); }
-    .roi-del {
-      background: none; border: none;
-      color: var(--red); cursor: pointer; font-size: 1rem; padding: 0 4px;
-    }
+    .info-box { background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:8px;padding:10px;font-size:0.75rem;color:var(--muted);line-height:1.6; }
 
-    /* ── Buttons ───────────────────────────────────────────────────── */
-    .btn {
-      display: flex; align-items: center; justify-content: center; gap: 7px;
-      padding: 10px 14px;
-      border: none; border-radius: 9px;
-      font-size: 0.83rem; font-weight: 600;
-      cursor: pointer; transition: all .18s;
-      width: 100%;
-    }
-    .btn-primary { background: var(--blue);  color: #fff; }
-    .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
-    .btn-success { background: var(--green); color: #fff; }
-    .btn-success:hover { background: #16a34a; }
-    .btn-danger  { background: var(--red);   color: #fff; }
-    .btn-danger:hover  { background: #dc2626; }
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-    .btn-sm { padding: 7px 10px; font-size: 0.77rem; width: auto; }
+    /* ── Canvas ── */
+    .canvas-area { display:flex;flex-direction:column;background:#080f1a;position:relative;overflow:hidden; }
+    .ctoolbar { display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--card);border-bottom:1px solid var(--border);font-size:0.78rem; }
+    .ctoolbar .lbl { color:var(--muted); }
+    .roi-btn { margin-left:auto;padding:5px 12px;background:transparent;border:1px solid var(--accent);border-radius:6px;color:var(--accent);font-size:0.76rem;font-weight:600;cursor:pointer;transition:all .2s; }
+    .roi-btn.active { background:var(--accent);color:var(--dark); }
 
-    /* ── Main Canvas Area ──────────────────────────────────────────── */
-    .canvas-area {
-      display: flex;
-      flex-direction: column;
-      background: #080f1a;
-      position: relative;
-      overflow: hidden;
-    }
-    .canvas-toolbar {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 16px;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      font-size: 0.8rem;
-    }
-    .canvas-toolbar .lbl { color: var(--muted); }
-    .roi-mode-btn {
-      margin-left: auto;
-      padding: 6px 14px;
-      background: transparent;
-      border: 1px solid var(--accent);
-      border-radius: 7px;
-      color: var(--accent);
-      font-size: 0.78rem; font-weight: 600;
-      cursor: pointer; transition: all .2s;
-    }
-    .roi-mode-btn.active {
-      background: var(--accent); color: var(--dark);
-    }
-    .canvas-wrap {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      padding: 16px;
-      position: relative;
-    }
-    #mainCanvas {
-      max-width: 100%; max-height: 100%;
-      border-radius: 8px;
-      cursor: crosshair;
-      display: block;
-    }
-    #videoEl {
-      max-width: 100%; max-height: 100%;
-      border-radius: 8px;
-      display: none;
-    }
-    #captureCanvas { display: none; }
-    .empty-state {
-      text-align: center;
-      color: var(--muted);
-    }
-    .empty-state .big-icon { font-size: 4rem; margin-bottom: 12px; }
-    .empty-state h3 { font-size: 1.1rem; margin-bottom: 6px; }
-    .empty-state p  { font-size: 0.82rem; }
+    .cwrap { flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:14px;position:relative; }
+    #resultImg { max-width:100%;max-height:100%;border-radius:7px;display:none; }
+    #drawCanvas { position:absolute;border-radius:7px;display:none;cursor:crosshair; }
+    #videoEl    { max-width:100%;max-height:60vh;border-radius:7px;display:none; }
+    #captureCanvas { display:none; }
 
-    /* ── Slot Results ──────────────────────────────────────────────── */
-    .slot-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      gap: 8px;
-      padding: 12px 16px;
-      background: var(--card);
-      border-top: 1px solid var(--border);
-      max-height: 120px;
-      overflow-y: auto;
-    }
-    .slot-badge {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 8px 6px;
-      border-radius: 8px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      border: 1.5px solid;
-      text-align: center;
-      gap: 2px;
-    }
-    .slot-badge.tersedia { border-color: var(--green); background: rgba(34,197,94,.1);  color: var(--green); }
-    .slot-badge.penuh    { border-color: var(--red);   background: rgba(239,68,68,.1);   color: var(--red); }
-    .slot-badge .slot-num { font-size: 1rem; }
+    .empty-state { text-align:center;color:var(--muted); }
+    .empty-state .bi { font-size:3.5rem;margin-bottom:10px; }
+    .empty-state h3  { font-size:1rem;margin-bottom:5px; }
+    .empty-state p   { font-size:0.8rem; }
 
-    /* ── Spinner ───────────────────────────────────────────────────── */
-    .spinner-overlay {
-      position: absolute; inset: 0;
-      background: rgba(0,0,0,.7);
-      display: none;
-      align-items: center; justify-content: center;
-      z-index: 20;
-      border-radius: 8px;
-    }
-    .spinner-overlay.active { display: flex; }
-    .spinner {
-      width: 48px; height: 48px;
-      border: 4px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .slot-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:7px;padding:10px 14px;background:var(--card);border-top:1px solid var(--border);max-height:110px;overflow-y:auto; }
+    .slot-badge { display:flex;flex-direction:column;align-items:center;padding:7px 5px;border-radius:7px;font-size:0.7rem;font-weight:700;border:1.5px solid;text-align:center;gap:2px; }
+    .slot-badge.t { border-color:var(--green);background:rgba(34,197,94,.1);color:var(--green); }
+    .slot-badge.p { border-color:var(--red);background:rgba(239,68,68,.1);color:var(--red); }
 
-    /* ── Toast ─────────────────────────────────────────────────────── */
-    #toast {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 12px 18px;
-      border-radius: 10px;
-      font-size: 0.82rem;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: all .3s;
-      z-index: 999;
-      max-width: 280px;
-    }
-    #toast.show { transform: translateY(0); opacity: 1; }
-    #toast.success { border-color: var(--green); color: var(--green); }
-    #toast.error   { border-color: var(--red);   color: var(--red); }
+    .spinner-ov { position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:20; }
+    .spinner-ov.on { display:flex; }
+    .spinner { width:44px;height:44px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite; }
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ── Live indicator ────────────────────────────────────────────── */
-    .live-dot {
-      display: inline-block;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--red);
-      animation: pulse 1.2s infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    #toast { position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--border);padding:11px 16px;border-radius:9px;font-size:0.8rem;transform:translateY(70px);opacity:0;transition:all .3s;z-index:999;max-width:260px; }
+    #toast.show { transform:translateY(0);opacity:1; }
+    #toast.ok  { border-color:var(--green);color:var(--green); }
+    #toast.err { border-color:var(--red);color:var(--red); }
 
-    /* ── Scrollbar ─────────────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    /* ── Responsive ────────────────────────────────────────────────── */
-    @media (max-width: 768px) {
-      .container { grid-template-columns: 1fr; height: auto; }
-      .sidebar { max-height: 50vh; }
-    }
+    .live-dot { display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.2s infinite; }
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    ::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    @media(max-width:768px){.layout{grid-template-columns:1fr;height:auto}.sidebar{max-height:55vh}}
   </style>
 </head>
 <body>
 
-<!-- ── Header ─────────────────────────────────────────────────────────── -->
 <header>
-  <div class="logo-icon">🅿️</div>
+  <div class="logo">🅿️</div>
   <div>
     <h1>Sistem Monitoring Slot Parkir Otomatis</h1>
-    <p>HOG + Gabor Filter + SVM | Politeknik Caltex Riau – Rizki Fajari (2255301167)</p>
+    <p>HOG + Gabor Filter + SVM &nbsp;|&nbsp; Politeknik Caltex Riau – Rizki Fajari (2255301167)</p>
   </div>
-  <div class="header-badge" id="modelStatus">● Model Ready</div>
+  <div class="badge">● Model Ready</div>
 </header>
 
-<!-- ── Stats Bar ──────────────────────────────────────────────────────── -->
-<div class="stats-bar">
-  <div class="stat-card total">
-    <div class="val" id="statTotal">–</div>
-    <div class="lbl">Total Slot</div>
-  </div>
-  <div class="stat-card avail">
-    <div class="val" id="statTersedia">–</div>
-    <div class="lbl">Tersedia</div>
-  </div>
-  <div class="stat-card full">
-    <div class="val" id="statPenuh">–</div>
-    <div class="lbl">Penuh</div>
-  </div>
-  <div class="stat-card pct">
-    <div class="val" id="statPct">–</div>
-    <div class="lbl">% Penuh</div>
-  </div>
+<div class="stats">
+  <div class="stat to"><div class="v" id="sTotal">–</div><div class="l">Total Slot</div></div>
+  <div class="stat av"><div class="v" id="sTersedia">–</div><div class="l">Tersedia</div></div>
+  <div class="stat fu"><div class="v" id="sPenuh">–</div><div class="l">Penuh</div></div>
+  <div class="stat pc"><div class="v" id="sPct">–</div><div class="l">% Penuh</div></div>
 </div>
 
-<!-- ── Main Layout ────────────────────────────────────────────────────── -->
-<div class="container">
-
-  <!-- ── Sidebar ──────────────────────────────────────────────────────── -->
+<div class="layout">
   <aside class="sidebar">
-
-    <!-- Mode Tabs -->
-    <div class="mode-tabs">
-      <button class="mode-tab active" id="tabImage" onclick="switchMode('image')">📷 Gambar</button>
-      <button class="mode-tab" id="tabCamera" onclick="switchMode('camera')">📹 Kamera Live</button>
+    <div class="tabs">
+      <button class="tab active" id="tabImg" onclick="switchMode('image')">📷 Gambar</button>
+      <button class="tab" id="tabCam" onclick="switchMode('camera')">📹 Kamera</button>
     </div>
 
-    <!-- ── IMAGE MODE ──────────────────────────────────────────────────── -->
-    <div id="imageSection" class="section">
-      <div class="section-title">Upload Gambar Parkir</div>
-      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()"
-           ondragover="handleDrag(event,'over')" ondragleave="handleDrag(event,'leave')" ondrop="handleDrop(event)">
-        <div class="icon">🖼️</div>
+    <!-- IMAGE -->
+    <div id="secImg" class="sec">
+      <div class="sec-title">Upload Gambar Parkir</div>
+      <div class="upload-area" id="uploadArea"
+           onclick="document.getElementById('fileInput').click()"
+           ondragover="doDrag(event,'over')" ondragleave="doDrag(event,'out')" ondrop="doDrop(event)">
+        <div class="ic">🖼️</div>
         <p>Klik atau drag & drop gambar</p>
         <span>JPG, PNG, BMP</span>
-        <img id="previewThumb" />
+        <img id="thumb" />
       </div>
-      <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)" />
-      <button class="btn btn-primary" id="btnDetect" onclick="detectImage()" disabled>
-        🔍 Deteksi Slot Parkir
-      </button>
+      <input type="file" id="fileInput" accept="image/*" onchange="loadFile(event.target.files[0])"/>
+      <button class="btn btn-primary" id="btnDetect" onclick="detectImage()" disabled>🔍 Deteksi Slot Parkir</button>
     </div>
 
-    <!-- ── CAMERA MODE ─────────────────────────────────────────────────── -->
-    <div id="cameraSection" class="section" style="display:none">
-      <div class="section-title">Kamera Live / CCTV</div>
-      <div class="cam-controls">
-        <button class="btn btn-success btn-sm" id="btnStartCam" onclick="startCamera()" style="flex:1">
-          ▶ Mulai Kamera
-        </button>
-        <button class="btn btn-danger btn-sm" id="btnStopCam" onclick="stopCamera()" style="flex:1" disabled>
-          ⏹ Stop
-        </button>
+    <!-- CAMERA -->
+    <div id="secCam" class="sec" style="display:none">
+      <div class="sec-title">Kamera Live / CCTV</div>
+      <div style="display:flex;gap:7px">
+        <button class="btn btn-success btn-sm" id="btnStart" onclick="startCam()" style="flex:1">▶ Mulai</button>
+        <button class="btn btn-danger btn-sm"  id="btnStop"  onclick="stopCam()"  style="flex:1" disabled>⏹ Stop</button>
       </div>
-      <div class="roi-info">
-        ℹ️ Kamera aktif → deteksi berjalan otomatis setiap <strong>2 detik</strong>.
-        Gambar bounding box diperbarui secara real-time.
+      <div class="info-box" id="liveInd" style="display:none">
+        <span class="live-dot"></span> LIVE – Mendeteksi setiap <span id="ivLabel">2</span>s
       </div>
-      <div style="display:flex; gap:8px; align-items:center; font-size:0.8rem; color:var(--muted)" id="liveIndicator" style="display:none">
-        <span class="live-dot"></span>
-        <span>LIVE – Mendeteksi...</span>
-      </div>
-      <label style="font-size:0.8rem; color:var(--muted); margin-top:4px">
-        Interval deteksi (detik):
-        <input type="range" id="intervalSlider" min="1" max="10" value="2"
-               style="width:100%; margin-top:4px; accent-color:var(--accent)"
-               oninput="updateInterval(this.value)">
-        <span id="intervalLabel" style="color:var(--accent); font-weight:600">2s</span>
+      <label style="font-size:0.76rem;color:var(--muted)">Interval:
+        <input type="range" id="ivSlider" min="1" max="10" value="2"
+               style="width:100%;margin-top:4px;accent-color:var(--accent)"
+               oninput="setInterval2(this.value)">
       </label>
     </div>
 
-    <!-- ── ROI Editor ────────────────────────────────────────────────── -->
-    <div class="section">
-      <div class="section-title">Konfigurasi ROI Slot</div>
-      <div class="roi-info">
-        💡 Klik tombol <strong>"Tambah ROI"</strong> lalu gambar kotak di atas gambar untuk menandai slot parkir.
-      </div>
-      <div id="roiList"></div>
-      <div style="display:flex; gap:8px">
-        <button class="btn btn-outline btn-sm" style="flex:1" onclick="resetROI()">🔄 Reset</button>
-        <button class="btn btn-outline btn-sm" style="flex:1" onclick="loadDefaultROI()">📐 Default ROI</button>
+    <!-- ROI GRID TOOL -->
+    <div class="sec">
+      <div class="sec-title">🔲 ROI Grid Otomatis</div>
+      <div class="grid-box">
+        <div class="info-box" style="margin-bottom:4px">Isi jumlah baris & kolom slot, lalu klik <strong>Generate Grid</strong>. ROI akan otomatis terbagi rata sesuai gambar.</div>
+        <div class="grid-row">
+          <label>Jumlah Baris</label>
+          <input type="number" id="gridRows" value="1" min="1" max="10">
+        </div>
+        <div class="grid-row">
+          <label>Jumlah Kolom</label>
+          <input type="number" id="gridCols" value="6" min="1" max="20">
+        </div>
+        <div class="grid-row">
+          <label>Margin X</label>
+          <input type="range" id="gridMX" min="0" max="200" value="10" oninput="document.getElementById('mxVal').textContent=this.value">
+          <span class="grid-val" id="mxVal">10</span>
+        </div>
+        <div class="grid-row">
+          <label>Margin Y</label>
+          <input type="range" id="gridMY" min="0" max="200" value="10" oninput="document.getElementById('myVal').textContent=this.value">
+          <span class="grid-val" id="myVal">10</span>
+        </div>
+        <button class="btn btn-primary" onclick="generateGrid()">🔲 Generate Grid ROI</button>
       </div>
     </div>
 
+    <!-- MANUAL ROI -->
+    <div class="sec">
+      <div class="sec-title">✏️ ROI Manual (Gambar Kotak)</div>
+      <div style="display:flex;gap:7px">
+        <button class="btn btn-outline btn-sm" style="flex:1" onclick="resetROI()">🔄 Reset</button>
+        <button class="btn btn-outline btn-sm" style="flex:1" id="roiModeBtn2" onclick="toggleROI()">✏️ Tambah ROI</button>
+      </div>
+      <div id="roiList" style="display:flex;flex-direction:column;gap:5px;max-height:140px;overflow-y:auto;margin-top:4px"></div>
+    </div>
   </aside>
 
-  <!-- ── Canvas Area ────────────────────────────────────────────────────── -->
+  <!-- CANVAS -->
   <div class="canvas-area">
-
-    <div class="canvas-toolbar">
+    <div class="ctoolbar">
       <span class="lbl">Canvas</span>
-      <span id="canvasInfo" style="color:var(--accent); font-size:0.8rem"></span>
-      <button class="roi-mode-btn" id="roiModeBtn" onclick="toggleROIMode()">
-        ✏️ Tambah ROI
-      </button>
+      <span id="cInfo" style="color:var(--accent);font-size:0.78rem"></span>
+      <button class="roi-btn" id="roiModeBtn" onclick="toggleROI()">✏️ Tambah ROI Manual</button>
     </div>
-
-    <div class="canvas-wrap" id="canvasWrap">
-      <!-- Empty state -->
+    <div class="cwrap" id="cwrap">
       <div class="empty-state" id="emptyState">
-        <div class="big-icon">🅿️</div>
+        <div class="bi">🅿️</div>
         <h3>Belum ada gambar</h3>
-        <p>Upload gambar atau nyalakan kamera untuk mulai deteksi</p>
+        <p>Upload gambar atau nyalakan kamera</p>
       </div>
-
-      <!-- Main result canvas -->
-      <img id="resultImg" style="display:none; max-width:100%; max-height:100%; border-radius:8px;" />
-
-      <!-- Video for live camera -->
-      <div style="position:relative; display:none;" id="videoWrap">
-        <video id="videoEl" autoplay playsinline muted style="max-width:100%; max-height:60vh; border-radius:8px; display:block;"></video>
-        <canvas id="overlayCanvas" style="position:absolute; top:0; left:0; pointer-events:none; border-radius:8px;"></canvas>
+      <img id="resultImg" />
+      <div style="position:relative;display:none" id="videoWrap">
+        <video id="videoEl" autoplay playsinline muted style="display:block"></video>
+        <canvas id="overlayCanvas" style="position:absolute;top:0;left:0;pointer-events:none;border-radius:7px"></canvas>
       </div>
-
-      <!-- Drawing canvas (ROI) -->
-      <canvas id="drawCanvas" style="position:absolute; border-radius:8px; display:none;"></canvas>
-
-      <!-- Spinner -->
-      <div class="spinner-overlay" id="spinner">
-        <div class="spinner"></div>
-      </div>
+      <canvas id="drawCanvas"></canvas>
+      <div class="spinner-ov" id="spinner"><div class="spinner"></div></div>
     </div>
-    <canvas id="captureCanvas" style="display:none"></canvas>
-
-    <!-- Slot Badges -->
+    <canvas id="captureCanvas"></canvas>
     <div class="slot-grid" id="slotGrid"></div>
   </div>
-
 </div>
 
-<!-- ── Toast ──────────────────────────────────────────────────────────── -->
 <div id="toast"></div>
 
 <script>
-/* ── State ──────────────────────────────────────────────────────────── */
-let mode         = 'image';
-let selectedFile = null;
-let roiList      = [];
-let roiDrawing   = false;
-let roiStart     = null;
-let roiActive    = false;
-let cameraStream = null;
-let detectTimer  = null;
-let detectInterval = 2000;
-let imgNaturalW  = 0, imgNaturalH = 0;
-let canvasDispW  = 0, canvasDispH = 0;
+/* ── State ── */
+let mode='image', selFile=null, roiList=[], roiOn=false;
+let roiStart=null, roiDraw=false;
+let natW=0, natH=0, dispW=0, dispH=0;
+let camStream=null, camTimer=null, camIv=2000;
 
-/* ── Mode Switch ────────────────────────────────────────────────────── */
-function switchMode(m) {
-  mode = m;
-  document.getElementById('tabImage').classList.toggle('active',  m === 'image');
-  document.getElementById('tabCamera').classList.toggle('active', m === 'camera');
-  document.getElementById('imageSection').style.display  = m === 'image'  ? 'flex' : 'none';
-  document.getElementById('cameraSection').style.display = m === 'camera' ? 'flex' : 'none';
-  if (m === 'image') stopCamera();
+/* ── Mode ── */
+function switchMode(m){
+  mode=m;
+  document.getElementById('tabImg').classList.toggle('active',m==='image');
+  document.getElementById('tabCam').classList.toggle('active',m==='camera');
+  document.getElementById('secImg').style.display=m==='image'?'flex':'none';
+  document.getElementById('secCam').style.display=m==='camera'?'flex':'none';
+  if(m==='image') stopCam();
 }
 
-/* ── File Upload ────────────────────────────────────────────────────── */
-function handleFileSelect(e) {
-  const f = e.target.files[0];
-  if (!f) return;
-  loadFile(f);
-}
-function handleDrag(e, type) {
-  e.preventDefault();
-  document.getElementById('uploadArea').classList.toggle('dragover', type === 'over');
-}
-function handleDrop(e) {
-  e.preventDefault();
-  handleDrag(e, 'leave');
-  const f = e.dataTransfer.files[0];
-  if (f) loadFile(f);
-}
-function loadFile(f) {
-  selectedFile = f;
-  const url = URL.createObjectURL(f);
-  const thumb = document.getElementById('previewThumb');
-  thumb.src = url; thumb.style.display = 'block';
-
-  // Show on main canvas
-  const img = new Image();
-  img.onload = () => {
-    imgNaturalW = img.naturalWidth;
-    imgNaturalH = img.naturalHeight;
-    document.getElementById('resultImg').src = url;
-    document.getElementById('resultImg').style.display = 'block';
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('canvasInfo').textContent = `${imgNaturalW}×${imgNaturalH}px`;
-    setupDrawCanvas();
+/* ── File ── */
+function doDrag(e,t){e.preventDefault();document.getElementById('uploadArea').classList.toggle('drag',t==='over');}
+function doDrop(e){e.preventDefault();doDrag(e,'out');loadFile(e.dataTransfer.files[0]);}
+function loadFile(f){
+  if(!f) return;
+  selFile=f;
+  const url=URL.createObjectURL(f);
+  const th=document.getElementById('thumb');
+  th.src=url; th.style.display='block';
+  const img=new Image();
+  img.onload=()=>{
+    natW=img.naturalWidth; natH=img.naturalHeight;
+    document.getElementById('resultImg').src=url;
+    document.getElementById('resultImg').style.display='block';
+    document.getElementById('emptyState').style.display='none';
+    document.getElementById('cInfo').textContent=natW+'×'+natH+'px';
+    setTimeout(setupDraw,100);
   };
-  img.src = url;
-  document.getElementById('btnDetect').disabled = false;
-  toast('Gambar dimuat: ' + f.name, 'success');
+  img.src=url;
+  document.getElementById('btnDetect').disabled=false;
+  toast('Gambar dimuat: '+f.name,'ok');
 }
 
-/* ── ROI Drawing ────────────────────────────────────────────────────── */
-function toggleROIMode() {
-  roiActive = !roiActive;
-  const btn = document.getElementById('roiModeBtn');
-  btn.classList.toggle('active', roiActive);
-  btn.textContent = roiActive ? '✅ Selesai ROI' : '✏️ Tambah ROI';
-  const dc = document.getElementById('drawCanvas');
-  dc.style.cursor = roiActive ? 'crosshair' : 'default';
-  if (roiActive) setupDrawCanvas();
-}
+/* ── Grid ROI Generator ── */
+function generateGrid(){
+  const rows=parseInt(document.getElementById('gridRows').value)||1;
+  const cols=parseInt(document.getElementById('gridCols').value)||6;
+  const mx=parseInt(document.getElementById('gridMX').value)||0;
+  const my=parseInt(document.getElementById('gridMY').value)||0;
 
-function setupDrawCanvas() {
-  const ri = document.getElementById('resultImg');
-  if (!ri || ri.style.display === 'none') return;
-  const rect = ri.getBoundingClientRect();
-  canvasDispW = rect.width;
-  canvasDispH = rect.height;
+  if(natW===0||natH===0){toast('Upload gambar dulu!','err');return;}
 
-  const dc = document.getElementById('drawCanvas');
-  dc.width  = rect.width;
-  dc.height = rect.height;
-  dc.style.width  = rect.width  + 'px';
-  dc.style.height = rect.height + 'px';
-  dc.style.left   = ri.offsetLeft + 'px';
-  dc.style.top    = ri.offsetTop  + 'px';
-  dc.style.display = roiActive ? 'block' : 'none';
-  drawExistingROI();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const dc = document.getElementById('drawCanvas');
-  dc.addEventListener('mousedown',  startDraw);
-  dc.addEventListener('mousemove',  moveDraw);
-  dc.addEventListener('mouseup',    endDraw);
-  dc.addEventListener('touchstart', e => startDraw(e.touches[0]), {passive:false});
-  dc.addEventListener('touchmove',  e => { e.preventDefault(); moveDraw(e.touches[0]); }, {passive:false});
-  dc.addEventListener('touchend',   e => endDraw(e.changedTouches[0]));
-  loadDefaultROI();
-});
-
-function getCanvasPos(e) {
-  const dc   = document.getElementById('drawCanvas');
-  const rect = dc.getBoundingClientRect();
-  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-}
-function startDraw(e) {
-  if (!roiActive) return;
-  roiDrawing = true;
-  roiStart   = getCanvasPos(e);
-}
-function moveDraw(e) {
-  if (!roiDrawing || !roiActive) return;
-  const ctx  = document.getElementById('drawCanvas').getContext('2d');
-  const dc   = document.getElementById('drawCanvas');
-  ctx.clearRect(0, 0, dc.width, dc.height);
-  drawExistingROI();
-  const cur  = getCanvasPos(e);
-  ctx.strokeStyle = '#38bdf8';
-  ctx.lineWidth   = 2;
-  ctx.setLineDash([6, 3]);
-  ctx.strokeRect(roiStart.x, roiStart.y, cur.x - roiStart.x, cur.y - roiStart.y);
-}
-function endDraw(e) {
-  if (!roiDrawing || !roiActive) return;
-  roiDrawing = false;
-  const cur  = getCanvasPos(e);
-  const rx   = Math.min(roiStart.x, cur.x);
-  const ry   = Math.min(roiStart.y, cur.y);
-  const rw   = Math.abs(cur.x - roiStart.x);
-  const rh   = Math.abs(cur.y - roiStart.y);
-  if (rw < 10 || rh < 10) return;
-
-  // Konversi ke koordinat gambar asli
-  const scaleX = imgNaturalW / canvasDispW;
-  const scaleY = imgNaturalH / canvasDispH;
-  roiList.push([
-    Math.round(rx * scaleX),
-    Math.round(ry * scaleY),
-    Math.round(rw * scaleX),
-    Math.round(rh * scaleY)
-  ]);
+  const sw=Math.floor((natW-mx*2)/cols);
+  const sh=Math.floor((natH-my*2)/rows);
+  roiList=[];
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      roiList.push([mx+c*sw, my+r*sh, sw-4, sh-4]);
+    }
+  }
   renderROIList();
-  drawExistingROI();
+  setupDraw();
+  toast(`✅ Grid ${rows}×${cols} = ${roiList.length} slot dibuat`,'ok');
 }
 
-function drawExistingROI() {
-  const dc  = document.getElementById('drawCanvas');
-  const ctx = dc.getContext('2d');
+/* ── ROI Drawing ── */
+function toggleROI(){
+  roiOn=!roiOn;
+  document.getElementById('roiModeBtn').classList.toggle('active',roiOn);
+  document.getElementById('roiModeBtn').textContent=roiOn?'✅ Selesai':'✏️ Tambah ROI Manual';
+  document.getElementById('roiModeBtn2').textContent=roiOn?'✅ Selesai':'✏️ Tambah ROI';
+  const dc=document.getElementById('drawCanvas');
+  dc.style.display=roiOn?'block':'none';
+  if(roiOn) setupDraw();
+}
+function setupDraw(){
+  const ri=document.getElementById('resultImg');
+  if(!ri||ri.style.display==='none') return;
+  const rect=ri.getBoundingClientRect();
+  const wrap=document.getElementById('cwrap');
+  const wRect=wrap.getBoundingClientRect();
+  dispW=rect.width; dispH=rect.height;
+  const dc=document.getElementById('drawCanvas');
+  dc.width=rect.width; dc.height=rect.height;
+  dc.style.width=rect.width+'px'; dc.style.height=rect.height+'px';
+  dc.style.left=(rect.left-wRect.left)+'px';
+  dc.style.top=(rect.top-wRect.top)+'px';
+  if(roiOn) dc.style.display='block';
+  drawAll();
+}
+function getPos(e){
+  const dc=document.getElementById('drawCanvas');
+  const r=dc.getBoundingClientRect();
+  return{x:e.clientX-r.left,y:e.clientY-r.top};
+}
+function startDraw(e){if(!roiOn)return;roiDraw=true;roiStart=getPos(e);}
+function moveDraw(e){
+  if(!roiDraw||!roiOn)return;
+  const cur=getPos(e);
+  const dc=document.getElementById('drawCanvas');
+  const ctx=dc.getContext('2d');
+  ctx.clearRect(0,0,dc.width,dc.height);
+  drawAll();
+  ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;ctx.setLineDash([5,3]);
+  ctx.strokeRect(roiStart.x,roiStart.y,cur.x-roiStart.x,cur.y-roiStart.y);
+}
+function endDraw(e){
+  if(!roiDraw||!roiOn)return;
+  roiDraw=false;
+  const cur=getPos(e);
+  const rx=Math.min(roiStart.x,cur.x),ry=Math.min(roiStart.y,cur.y);
+  const rw=Math.abs(cur.x-roiStart.x),rh=Math.abs(cur.y-roiStart.y);
+  if(rw<8||rh<8)return;
+  const sx=natW/dispW,sy=natH/dispH;
+  roiList.push([Math.round(rx*sx),Math.round(ry*sy),Math.round(rw*sx),Math.round(rh*sy)]);
+  renderROIList();
+  drawAll();
+}
+function drawAll(){
+  const dc=document.getElementById('drawCanvas');
+  const ctx=dc.getContext('2d');
   ctx.setLineDash([]);
-  roiList.forEach(([x, y, w, h], i) => {
-    const scaleX = canvasDispW / imgNaturalW;
-    const scaleY = canvasDispH / imgNaturalH;
-    const dx = x * scaleX, dy = y * scaleY, dw = w * scaleX, dh = h * scaleY;
-    ctx.strokeStyle = '#f59e0b';
-    ctx.lineWidth   = 2;
-    ctx.strokeRect(dx, dy, dw, dh);
-    ctx.fillStyle   = 'rgba(245,158,11,.15)';
-    ctx.fillRect(dx, dy, dw, dh);
-    ctx.fillStyle   = '#f59e0b';
-    ctx.font        = 'bold 12px sans-serif';
-    ctx.fillText(`S${i+1}`, dx+4, dy+14);
+  roiList.forEach(([x,y,w,h],i)=>{
+    const sx=dispW/natW,sy=dispH/natH;
+    const dx=x*sx,dy=y*sy,dw=w*sx,dh=h*sy;
+    ctx.strokeStyle='#f59e0b';ctx.lineWidth=2;
+    ctx.strokeRect(dx,dy,dw,dh);
+    ctx.fillStyle='rgba(245,158,11,.12)';
+    ctx.fillRect(dx,dy,dw,dh);
+    ctx.fillStyle='#f59e0b';ctx.font='bold 11px sans-serif';
+    ctx.fillText('S'+(i+1),dx+3,dy+13);
   });
 }
 
-function renderROIList() {
-  const el = document.getElementById('roiList');
-  el.innerHTML = roiList.length === 0
-    ? '<div style="font-size:0.77rem;color:var(--muted);text-align:center">Belum ada ROI — gambar kotak di atas gambar</div>'
-    : roiList.map((r, i) => `
-        <div class="roi-item">
-          <div class="roi-num">${i+1}</div>
-          <div class="roi-coords">x:${r[0]} y:${r[1]} w:${r[2]} h:${r[3]}</div>
-          <button class="roi-del" onclick="deleteROI(${i})">✕</button>
-        </div>`).join('');
-}
-function deleteROI(i) { roiList.splice(i, 1); renderROIList(); setupDrawCanvas(); }
-function resetROI()   { roiList = []; renderROIList(); setupDrawCanvas(); }
-function loadDefaultROI() {
-  roiList = [[30,50,80,100],[120,50,80,100],[210,50,80,100],[300,50,80,100],[390,50,80,100]];
-  renderROIList();
-}
-
-/* ── Detect Image ───────────────────────────────────────────────────── */
-async function detectImage() {
-  if (!selectedFile) return;
-  showSpinner(true);
-  try {
-    const fd = new FormData();
-    fd.append('image', selectedFile);
-    fd.append('roi',   JSON.stringify(roiList));
-    const res  = await fetch('/detect/image', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Error');
-    renderResult(data);
-    toast(`✅ Terdeteksi ${data.total} slot — ${data.n_tersedia} tersedia`, 'success');
-  } catch(err) {
-    toast('❌ ' + err.message, 'error');
+/* ── ROI List ── */
+function renderROIList(){
+  const el=document.getElementById('roiList');
+  if(roiList.length===0){
+    el.innerHTML='<div style="font-size:.75rem;color:var(--muted);text-align:center">Belum ada ROI</div>';
+    return;
   }
-  showSpinner(false);
-}
-
-/* ── Camera Live ────────────────────────────────────────────────────── */
-async function startCamera() {
-  try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 640, height: 480, facingMode: 'environment' },
-      audio: false
-    });
-    const vid = document.getElementById('videoEl');
-    vid.srcObject = cameraStream;
-    vid.style.display = 'block';
-    document.getElementById('videoWrap').style.display = 'block';
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('resultImg').style.display  = 'none';
-    document.getElementById('btnStartCam').disabled = true;
-    document.getElementById('btnStopCam').disabled  = false;
-    document.getElementById('liveIndicator').style.display = 'flex';
-    // Start auto-detect loop
-    detectTimer = setInterval(detectLiveFrame, detectInterval);
-    toast('📹 Kamera aktif', 'success');
-  } catch(err) {
-    toast('❌ Kamera tidak dapat diakses: ' + err.message, 'error');
-  }
-}
-
-function stopCamera() {
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(t => t.stop());
-    cameraStream = null;
-  }
-  if (detectTimer) { clearInterval(detectTimer); detectTimer = null; }
-  const vid = document.getElementById('videoEl');
-  vid.style.display = 'none';
-  document.getElementById('videoWrap').style.display = 'none';
-  document.getElementById('btnStartCam').disabled = false;
-  document.getElementById('btnStopCam').disabled  = true;
-  document.getElementById('liveIndicator').style.display = 'none';
-}
-
-function updateInterval(val) {
-  detectInterval = parseInt(val) * 1000;
-  document.getElementById('intervalLabel').textContent = val + 's';
-  if (detectTimer) {
-    clearInterval(detectTimer);
-    detectTimer = setInterval(detectLiveFrame, detectInterval);
-  }
-}
-
-async function detectLiveFrame() {
-  const vid = document.getElementById('videoEl');
-  if (!vid.videoWidth) return;
-  const cap = document.getElementById('captureCanvas');
-  cap.width  = vid.videoWidth;
-  cap.height = vid.videoHeight;
-  cap.getContext('2d').drawImage(vid, 0, 0);
-  const frameB64 = cap.toDataURL('image/jpeg', 0.8);
-  try {
-    const res  = await fetch('/detect/frame', {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({ frame: frameB64, roi: roiList })
-    });
-    const data = await res.json();
-    if (!data.success) return;
-    // Overlay result image on video
-    const overlay = document.getElementById('overlayCanvas');
-    const wrap    = document.getElementById('videoWrap');
-    const vidRect = vid.getBoundingClientRect();
-    overlay.width  = vid.videoWidth;
-    overlay.height = vid.videoHeight;
-    overlay.style.width  = vidRect.width  + 'px';
-    overlay.style.height = vidRect.height + 'px';
-    // Draw result image as overlay
-    const img = new Image();
-    img.onload = () => overlay.getContext('2d').drawImage(img, 0, 0, overlay.width, overlay.height);
-    img.src = 'data:image/jpeg;base64,' + data.image_b64;
-    updateStats(data);
-    renderSlotBadges(data.results);
-  } catch(e) { /* silent fail on live */ }
-}
-
-/* ── Render Result ──────────────────────────────────────────────────── */
-function renderResult(data) {
-  const ri = document.getElementById('resultImg');
-  ri.src   = 'data:image/jpeg;base64,' + data.image_b64;
-  ri.style.display = 'block';
-  document.getElementById('emptyState').style.display = 'none';
-  updateStats(data);
-  renderSlotBadges(data.results);
-}
-
-function updateStats(data) {
-  document.getElementById('statTotal').textContent    = data.total;
-  document.getElementById('statTersedia').textContent = data.n_tersedia;
-  document.getElementById('statPenuh').textContent    = data.n_penuh;
-  const pct = data.total > 0 ? Math.round((data.n_penuh / data.total) * 100) : 0;
-  document.getElementById('statPct').textContent = pct + '%';
-}
-
-function renderSlotBadges(results) {
-  const grid = document.getElementById('slotGrid');
-  grid.innerHTML = results.map(r => `
-    <div class="slot-badge ${r.status === 'Tersedia' ? 'tersedia' : 'penuh'}">
-      <span class="slot-num">${r.status === 'Tersedia' ? '🟢' : '🔴'}</span>
-      <span>Slot ${r.slot_id}</span>
-      <span>${r.status}</span>
-      <span style="opacity:.7;font-size:0.67rem">${r.confidence}%</span>
+  el.innerHTML=roiList.map((r,i)=>`
+    <div style="display:flex;align-items:center;gap:7px;background:var(--dark);border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-size:.75rem">
+      <div style="width:20px;height:20px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0">${i+1}</div>
+      <div style="flex:1;color:var(--muted)">x:${r[0]} y:${r[1]} w:${r[2]} h:${r[3]}</div>
+      <button onclick="delROI(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.95rem">✕</button>
     </div>`).join('');
 }
+function delROI(i){roiList.splice(i,1);renderROIList();drawAll();}
+function resetROI(){roiList=[];renderROIList();drawAll();}
 
-/* ── Helpers ────────────────────────────────────────────────────────── */
-function showSpinner(v) {
-  document.getElementById('spinner').classList.toggle('active', v);
-}
-function toast(msg, type='') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className   = 'show ' + type;
-  setTimeout(() => el.className = '', 3000);
+/* ── Detect ── */
+async function detectImage(){
+  if(!selFile)return;
+  showSpin(true);
+  try{
+    const fd=new FormData();
+    fd.append('image',selFile);
+    fd.append('roi',JSON.stringify(roiList));
+    const res=await fetch('/detect/image',{method:'POST',body:fd});
+    const d=await res.json();
+    if(!d.success) throw new Error(d.error||'Error');
+    document.getElementById('resultImg').src='data:image/jpeg;base64,'+d.image_b64;
+    updateStats(d); renderBadges(d.results);
+    toast('✅ '+d.total+' slot – '+d.n_tersedia+' tersedia','ok');
+  }catch(e){toast('❌ '+e.message,'err');}
+  showSpin(false);
 }
 
-// Check model health on load
-fetch('/health').then(r => r.json()).then(d => {
-  if (d.status === 'ok') {
-    document.getElementById('modelStatus').textContent = '● Model Ready';
-  }
-}).catch(() => {
-  document.getElementById('modelStatus').textContent = '● Offline';
-  document.getElementById('modelStatus').style.borderColor = 'var(--red)';
-  document.getElementById('modelStatus').style.color = 'var(--red)';
-});
+/* ── Camera ── */
+async function startCam(){
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({video:{width:640,height:480},audio:false});
+    const v=document.getElementById('videoEl');
+    v.srcObject=camStream; v.style.display='block';
+    document.getElementById('videoWrap').style.display='block';
+    document.getElementById('emptyState').style.display='none';
+    document.getElementById('resultImg').style.display='none';
+    document.getElementById('btnStart').disabled=true;
+    document.getElementById('btnStop').disabled=false;
+    document.getElementById('liveInd').style.display='block';
+    camTimer=setInterval(detectFrame,camIv);
+    toast('📹 Kamera aktif','ok');
+  }catch(e){toast('❌ Kamera: '+e.message,'err');}
+}
+function stopCam(){
+  if(camStream) camStream.getTracks().forEach(t=>t.stop());
+  camStream=null;
+  if(camTimer){clearInterval(camTimer);camTimer=null;}
+  document.getElementById('videoEl').style.display='none';
+  document.getElementById('videoWrap').style.display='none';
+  document.getElementById('btnStart').disabled=false;
+  document.getElementById('btnStop').disabled=true;
+  document.getElementById('liveInd').style.display='none';
+}
+function setInterval2(v){
+  camIv=parseInt(v)*1000;
+  document.getElementById('ivLabel').textContent=v;
+  if(camTimer){clearInterval(camTimer);camTimer=setInterval(detectFrame,camIv);}
+}
+async function detectFrame(){
+  const v=document.getElementById('videoEl');
+  if(!v.videoWidth)return;
+  const cap=document.getElementById('captureCanvas');
+  cap.width=v.videoWidth;cap.height=v.videoHeight;
+  cap.getContext('2d').drawImage(v,0,0);
+  try{
+    const res=await fetch('/detect/frame',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({frame:cap.toDataURL('image/jpeg',.8),roi:roiList})});
+    const d=await res.json();
+    if(!d.success)return;
+    const ov=document.getElementById('overlayCanvas');
+    const vr=v.getBoundingClientRect();
+    ov.width=v.videoWidth;ov.height=v.videoHeight;
+    ov.style.width=vr.width+'px';ov.style.height=vr.height+'px';
+    const img=new Image();
+    img.onload=()=>ov.getContext('2d').drawImage(img,0,0,ov.width,ov.height);
+    img.src='data:image/jpeg;base64,'+d.image_b64;
+    updateStats(d);renderBadges(d.results);
+  }catch(e){}
+}
+
+/* ── Helpers ── */
+function updateStats(d){
+  document.getElementById('sTotal').textContent=d.total;
+  document.getElementById('sTersedia').textContent=d.n_tersedia;
+  document.getElementById('sPenuh').textContent=d.n_penuh;
+  document.getElementById('sPct').textContent=d.total>0?Math.round(d.n_penuh/d.total*100)+'%':'–';
+}
+function renderBadges(results){
+  document.getElementById('slotGrid').innerHTML=results.map(r=>`
+    <div class="slot-badge ${r.status==='Tersedia'?'t':'p'}">
+      <span>${r.status==='Tersedia'?'🟢':'🔴'}</span>
+      <span>Slot ${r.slot_id}</span>
+      <span>${r.status}</span>
+      <span style="opacity:.7;font-size:.65rem">${r.confidence}%</span>
+    </div>`).join('');
+}
+function showSpin(v){document.getElementById('spinner').classList.toggle('on',v);}
+function toast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='show '+type;
+  setTimeout(()=>el.className='',3000);
+}
+
+/* ── Init ── */
+const dc=document.getElementById('drawCanvas');
+dc.addEventListener('mousedown',startDraw);
+dc.addEventListener('mousemove',moveDraw);
+dc.addEventListener('mouseup',endDraw);
+dc.addEventListener('touchstart',e=>startDraw(e.touches[0]),{passive:true});
+dc.addEventListener('touchmove',e=>{e.preventDefault();moveDraw(e.touches[0]);},{passive:false});
+dc.addEventListener('touchend',e=>endDraw(e.changedTouches[0]));
+window.addEventListener('resize',setupDraw);
+renderROIList();
 </script>
 </body>
 </html>
